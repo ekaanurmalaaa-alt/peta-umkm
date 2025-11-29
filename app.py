@@ -100,16 +100,19 @@ if pilih_kategori != "Semua":
     data_tampil = data_tampil[data_tampil["Kategori"] == pilih_kategori]
 
 # =========================
+#  FIX: RENAME KE FORMAT YANG DITERIMA STREAMLIT
+# =========================
+data_tampil = data_tampil.rename(columns={
+    "Latitude": "latitude",
+    "Longitude": "longitude"
+})
+
+# =========================
 #       TABEL DATA
 # =========================
 st.subheader("📋 Daftar UMKM")
 st.dataframe(
     data_tampil,
-    column_config={
-        "Nama UMKM": "Nama UMKM",
-        "Kategori": "Kategori",
-        "Kecamatan": "Kecamatan"
-    },
     use_container_width=True
 )
 
@@ -117,7 +120,7 @@ st.dataframe(
 #          PETA
 # =========================
 st.subheader("📍 Peta Lokasi UMKM")
-st.map(data_tampil[["Latitude", "Longitude"]])
+st.map(data_tampil[["latitude", "longitude"]])
 
 # =========================
 #        FOOTER
