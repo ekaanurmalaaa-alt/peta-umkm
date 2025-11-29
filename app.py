@@ -1,69 +1,125 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Peta UMKM Sulawesi Barat", layout="wide")
-st.title("🗺️ Peta UMKM Sulawesi Barat (Tanpa Library Tambahan)")
+# =========================
+#      CONFIG PAGE
+# =========================
+st.set_page_config(
+    page_title="Peta UMKM Polewali Mandar",
+    page_icon="🗺️",
+    layout="wide"
+)
 
+# =========================
+#      CUSTOM CSS
+# =========================
 st.markdown("""
-Aplikasi ini menampilkan lokasi UMKM di Sulawesi Barat menggunakan **peta bawaan Streamlit**.
-Tidak membutuhkan instalasi library tambahan seperti Folium atau Plotly.
-""")
+    <style>
+    .title {
+        font-size: 42px;
+        font-weight: 800;
+        color: #0A5EB0;
+        text-align: center;
+        margin-bottom: -5px;
+    }
+    .subtitle {
+        font-size: 18px;
+        color: #444;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    .footer {
+        text-align: center;
+        color: #777;
+        margin-top: 45px;
+        font-size: 13px;
+    }
+    .block-container {
+        padding-top: 1rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# ======================
-# DATA UMKM
-# ======================
-data = {
-    "nama_umkm": [
-        "Warung Makan Sederhana", "Toko Kue Manis", "Butik Muslimah Cantik",
-        "Toko Sembako Murah", "Kedai Kopi Santai", "Toko Oleh-Oleh Sulbar",
-        "Bengkel Motor Jaya", "Laundry Bersih Selalu", "Rumah Makan Laut Segar",
-        "Toko Elektronik Maju Tech"
+# =========================
+#        DATA UMKM
+# =========================
+data_umkm = pd.DataFrame({
+    "Nama UMKM": [
+        "Kue Mandar Sari", "Kopi Lapeo", "Kerajinan Anyaman",
+        "Abon Ikan Polewali", "Dodol Mandar", "Sambal Mandar",
+        "Pecel Mandar", "Kain Tenun Mandar"
     ],
-    "kategori": [
-        "Kuliner", "Kuliner", "Fashion",
-        "Sembako", "Kuliner", "Kerajinan",
-        "Otomotif", "Jasa", "Kuliner", "Elektronik"
+    "Kategori": [
+        "Kuliner", "Minuman", "Kerajinan",
+        "Kuliner", "Kuliner", "Kuliner",
+        "Kuliner", "Kerajinan"
     ],
-    "kabupaten": [
-        "Polewali Mandar", "Polewali Mandar", "Mamuju",
-        "Mamuju", "Majene", "Majene",
-        "Polewali Mandar", "Mamuju Tengah", "Mamuju", "Pasangkayu"
+    "Kecamatan": [
+        "Polewali", "Binuang", "Wonomulyo",
+        "Mapilli", "Tapango", "Polewali",
+        "Wonomulyo", "Campalagian"
     ],
-    "lat": [-3.4321, -3.4455, -2.6744, -2.6901, -3.5378, -3.5222, -3.4655, -2.7166, -2.6749, -1.1902],
-    "lon": [119.3432, 119.3655, 118.8877, 118.9012, 118.9734, 118.9659, 119.3111, 119.0134, 118.8966, 119.3621]
-}
+    "Latitude": [
+        -3.4321, -3.5001, -3.4567,
+        -3.4801, -3.5222, -3.4404,
+        -3.4600, -3.4705
+    ],
+    "Longitude": [
+        119.3433, 119.3550, 119.3888,
+        119.3102, 119.4001, 119.3500,
+        119.3990, 119.3201
+    ]
+})
 
-df = pd.DataFrame(data)
+# =========================
+#           UI
+# =========================
+st.markdown('<p class="title">🗺️ Peta Digital UMKM Polewali Mandar</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Menampilkan lokasi UMKM terbaik dari berbagai kecamatan di Polewali Mandar</p>', unsafe_allow_html=True)
 
-# ======================
-# SIDEBAR FILTER
-# ======================
-st.sidebar.header("Filter")
+# =========================
+#      SIDEBAR FILTER
+# =========================
+st.sidebar.header("🔎 Filter Data")
 
-kab_opts = ["Semua"] + sorted(df["kabupaten"].unique())
-kat_opts = ["Semua"] + sorted(df["kategori"].unique())
+# Kecamatan
+kecamatan_list = ["Semua"] + sorted(data_umkm["Kecamatan"].unique())
+pilih_kecamatan = st.sidebar.selectbox("Pilih Kecamatan", kecamatan_list)
 
-pilih_kab = st.sidebar.selectbox("Pilih Kabupaten", kab_opts)
-pilih_kat = st.sidebar.selectbox("Pilih Kategori", kat_opts)
+# Kategori
+kategori_list = ["Semua"] + sorted(data_umkm["Kategori"].unique())
+pilih_kategori = st.sidebar.selectbox("Pilih Kategori UMKM", kategori_list)
 
-filtered = df.copy()
+# Filter data
+data_tampil = data_umkm.copy()
 
-if pilih_kab != "Semua":
-    filtered = filtered[filtered["kabupaten"] == pilih_kab]
+if pilih_kecamatan != "Semua":
+    data_tampil = data_tampil[data_tampil["Kecamatan"] == pilih_kecamatan]
 
-if pilih_kat != "Semua":
-    filtered = filtered[filtered["kategori"] == pilih_kat]
+if pilih_kategori != "Semua":
+    data_tampil = data_tampil[data_tampil["Kategori"] == pilih_kategori]
 
-st.write(f"### Jumlah UMKM ditemukan: {len(filtered)}")
+# =========================
+#       TABEL DATA
+# =========================
+st.subheader("📋 Daftar UMKM")
+st.dataframe(
+    data_tampil,
+    column_config={
+        "Nama UMKM": "Nama UMKM",
+        "Kategori": "Kategori",
+        "Kecamatan": "Kecamatan"
+    },
+    use_container_width=True
+)
 
-# ======================
-# PETA STREAMLIT
-# ======================
-st.subheader("🗺️ Peta Lokasi UMKM")
-st.map(filtered.rename(columns={"lat": "latitude", "lon": "longitude"}))
+# =========================
+#          PETA
+# =========================
+st.subheader("📍 Peta Lokasi UMKM")
+st.map(data_tampil[["Latitude", "Longitude"]])
 
-# ======================
-# TABEL DATA
-# ======================
-st.subheader("📋 Tabel UMKM")
-st.dataframe(filtered)
+# =========================
+#        FOOTER
+# =========================
+st.markdown('<p class="footer">© 2025 • Peta UMKM Polewali Mandar • Dibuat dengan Streamlit</p>', unsafe_allow_html=True)
